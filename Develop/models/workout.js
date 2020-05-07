@@ -1,45 +1,59 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const WorkoutSchema = new Schema({
-  exerciseType: {
-    type: String,
-    unique: true,
-    required: "Please enter the type of exercise"
+const workoutSchema = new Schema(
+  {
+    day: {
+      type: Date,
+      default: () => new Date()
+    },
+    exercises: [
+      {
+        type: {
+          type: String,
+          trim: true,
+          required: "Enter an exercise type"
+        },
+        name: {
+          type: String,
+          trim: true,
+          required: "Enter an exercise name"
+        },
+        duration: {
+          type: Number,
+          required: "Enter an exercise duration in minutes"
+        },
+        weight: {
+          type: Number
+        },
+        reps: {
+          type: Number
+        },
+        sets: {
+          type: Number
+        },
+        distance: {
+          type: Number
+        }
+      }
+    ]
   },
-  exerciseName: {
-    type: String,
-    unique: true,
-    required:  "Please enter the name of exercise"
-  },
-  weight: {
-    type: Number,
-    required:  "Please enter a weight"
-  },
-  sets: {
-    type: Number
-  },
-  reps: {
-    type: Number
-  },
-  duration: {
-    type: Number
-  },
-  distance: {
-    type: Number
-  },
-  date: {
-    type: Date,
-    default: Date.now
-  },
-  workouts: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Workout"
+  {
+    toJSON: {
+      // include any virtual properties when data is requested
+      virtuals: true
     }
-  ]
+  }
+);
+
+// adds a dynamically-created property to schema
+workoutSchema.virtual("totalDuration").get(function () {
+  // "reduce" array of exercises down to just the sum of their durations
+  return this.exercises.reduce((total, exercise) => {
+    return total + exercise.duration;
+  }, 0);
 });
 
-const Workouts = mongoose.model("Exercise", WorkoutSchema);
+const Workout = mongoose.model("Workout", workoutSchema);
 
-module.exports = Workouts;
+module.exports = Workout;
